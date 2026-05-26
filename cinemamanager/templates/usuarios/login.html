@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block title %}Iniciar sesión — CinemaManager{% endblock %}
+{% block content %}
+<div class="auth-wrapper">
+  <div class="auth-card">
+    <div class="auth-title">Bienvenido</div>
+    <div class="auth-sub">Inicia sesión para continuar</div>
+    <form method="post">
+      {% csrf_token %}
+      {% for field in form %}
+      <div class="form-group">
+        <label class="form-label">{{ field.label }}</label>
+        <input type="{{ field.field.widget.input_type }}"
+               name="{{ field.html_name }}"
+               class="form-control"
+               placeholder="{{ field.field.widget.attrs.placeholder|default:'' }}">
+        {% if field.errors %}<div class="form-error">{{ field.errors|join:", " }}</div>{% endif %}
+      </div>
+      {% endfor %}
+      <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:.5rem">Ingresar</button>
+    </form>
+    <div class="auth-footer">¿No tienes cuenta? <a href="{% url 'registro' %}">Regístrate aquí</a></div>
+  </div>
+</div>
+{% endblock %}

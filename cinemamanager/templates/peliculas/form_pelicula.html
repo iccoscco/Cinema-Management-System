@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+{% block title %}{{ titulo }} — CinemaManager{% endblock %}
+{% block content %}
+<div class="auth-wrapper">
+  <div class="auth-card" style="max-width:560px">
+    <div class="auth-title">{{ titulo }}</div>
+    <div class="auth-sub">Los campos marcados son obligatorios</div>
+    <form method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      {% for field in form %}
+      <div class="form-group">
+        <label class="form-label">{{ field.label }}</label>
+        {% if field.field.widget.input_type == 'checkbox' %}
+          <div style="display:flex;align-items:center;gap:.5rem;">{{ field }}<span style="font-size:.85rem;color:var(--text-muted)">Marcar como destacada</span></div>
+        {% else %}
+          <div style="position:relative">{{ field }}</div>
+        {% endif %}
+        {% if field.help_text %}<div class="form-error" style="color:var(--text-muted)">{{ field.help_text }}</div>{% endif %}
+        {% if field.errors %}<div class="form-error">{{ field.errors|join:", " }}</div>{% endif %}
+      </div>
+      {% endfor %}
+      <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:.5rem">Guardar película</button>
+      <a href="{% url 'home' %}" class="btn btn-ghost" style="width:100%;justify-content:center;margin-top:.5rem">Cancelar</a>
+    </form>
+  </div>
+</div>
+<style>
+  .auth-card input, .auth-card select, .auth-card textarea {
+    width:100%; background:var(--bg3); border:1px solid var(--border);
+    border-radius:10px; padding:.65rem .9rem; color:var(--text);
+    font-size:.9rem; font-family:'Inter',sans-serif; outline:none;
+  }
+  .auth-card input:focus, .auth-card select:focus, .auth-card textarea:focus {
+    border-color:var(--neon); box-shadow:0 0 0 3px rgba(176,38,255,.15);
+  }
+  .auth-card select option { background:var(--bg3); }
+</style>
+{% endblock %}

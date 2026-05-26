@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block title %}Mis entradas — CinemaManager{% endblock %}
+{% block content %}
+<div class="page">
+  <div class="container">
+    <div class="section-title">🎟 Mis entradas</div>
+    {% if compras %}
+    <div class="card">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Película</th>
+              <th>Función</th>
+              <th>Sala</th>
+              <th>Cant.</th>
+              <th>Total</th>
+              <th>Fecha</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for c in compras %}
+            <tr>
+              <td><a href="{% url 'detalle' c.funcion.pelicula.pk %}" style="color:var(--neon-bright);text-decoration:none">{{ c.funcion.pelicula.titulo }}</a></td>
+              <td>{{ c.funcion.fecha_hora|date:"d/m/Y H:i" }}</td>
+              <td>{{ c.funcion.sala }}</td>
+              <td>{{ c.cantidad }}</td>
+              <td>S/ {{ c.total }}</td>
+              <td>{{ c.fecha_compra|date:"d/m/Y" }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <div class="empty-icon">🎟</div>
+      <h3>Sin compras aún</h3>
+      <p>Explora el catálogo y compra tus primeras entradas.</p>
+      <a href="{% url 'home' %}" class="btn btn-primary" style="margin-top:1rem">Ver catálogo</a>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

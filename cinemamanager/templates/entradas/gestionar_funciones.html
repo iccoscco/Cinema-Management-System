@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% block title %}Gestionar funciones — CinemaManager{% endblock %}
+{% block content %}
+<div class="page">
+  <div class="container">
+    <div class="flex items-center justify-between mb-2">
+      <div class="section-title" style="margin-bottom:0">📅 Funciones</div>
+      <a href="{% url 'crear_funcion' %}" class="btn btn-primary">+ Nueva función</a>
+    </div>
+    {% if funciones %}
+      {% for f in funciones %}
+      <div class="funcion-item">
+        <div class="funcion-info">
+          <div class="movie-title">{{ f.pelicula.titulo }}</div>
+          <div class="funcion-fecha">{{ f.fecha_hora|date:"D d/m/Y H:i" }}</div>
+          <div class="funcion-sala">Sala {{ f.sala }} · S/ {{ f.precio }}</div>
+          <div class="funcion-seats">{{ f.asientos_disponibles }} / {{ f.asientos_totales }} asientos</div>
+        </div>
+        <form method="post" action="{% url 'eliminar_funcion' f.pk %}" style="display:inline">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger" onclick="return confirm('¿Eliminar esta función?')">✕</button>
+        </form>
+      </div>
+      {% endfor %}
+    {% else %}
+    <div class="empty-state">
+      <div class="empty-icon">📅</div>
+      <h3>Sin funciones</h3>
+      <p>Crea funciones para que los clientes puedan comprar entradas.</p>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

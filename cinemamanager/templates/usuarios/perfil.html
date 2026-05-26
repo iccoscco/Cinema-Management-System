@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block title %}Perfil — CinemaManager{% endblock %}
+{% block content %}
+<div class="page">
+  <div class="container">
+    <div class="section-title">Mi perfil</div>
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-value">{{ user.compras.count }}</div>
+        <div class="stat-label">Compras</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">{{ user.favoritos.count }}</div>
+        <div class="stat-label">Favoritos</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value">{{ comentarios.count }}</div>
+        <div class="stat-label">Comentarios</div>
+      </div>
+    </div>
+    <div class="card mb-2">
+      <div class="card-title">Información</div>
+      <p><strong>Usuario:</strong> {{ user.username }}</p>
+      <p class="mt-1"><strong>Email:</strong> {{ user.email }}</p>
+      <p class="mt-1"><strong>Edad:</strong> {{ user.edad|default:'No especificada' }}</p>
+      <p class="mt-1"><strong>Rol:</strong> {{ user.get_rol_display }}</p>
+    </div>
+    {% if user.favoritos.all %}
+    <div class="section-title">Mis favoritos</div>
+    <div class="movie-grid">
+      {% for p in user.favoritos.all %}
+      <a href="{% url 'detalle' p.pk %}" class="movie-card">
+        {% if p.imagen %}<img src="{{ p.imagen.url }}" alt="{{ p.titulo }}" class="movie-poster">
+        {% else %}<div class="movie-poster-placeholder">🎬</div>{% endif %}
+        <div class="movie-info">
+          <div class="movie-title">{{ p.titulo }}</div>
+          <div class="movie-meta">{{ p.anio }}</div>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

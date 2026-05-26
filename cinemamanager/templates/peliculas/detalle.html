@@ -1,0 +1,116 @@
+{% extends 'base.html' %}
+{% block title %}{{ pelicula.titulo }} — CinemaManager{% endblock %}
+{% block content %}
+<div class="page">
+  <div class="container">
+    <div class="detail-layout">
+      <!-- Poster -->
+      <div>
+        {% if pelicula.imagen %}
+          <img src="{{ pelicula.imagen.url }}" alt="{{ pelicula.titulo }}" class="detail-poster">
+        {% elif pelicula.poster_url %}
+          <img src="{{ pelicula.poster_url }}" alt="{{ pelicula.titulo }}" class="detail-poster">
+        {% else %}
+          <div class="detail-poster-placeholder">🎬</div>
+        {% endif %}
+      </div>
+      <!-- Info -->
+      <div>
+        <div class="detail-title">{{ pelicula.titulo }}</div>
+        <div class="detail-badges">
+          {% if pelicula.genero %}<span class="badge badge-purple">{{ pelicula.genero }}</span>{% endif %}
+          <span class="badge badge-gray">{{ pelicula.anio }}</span>
+          <span class="badge badge-gray">{{ pelicula.duracion }} min</span>
+          {% if pelicula.rating_promedio %}<span class="badge badge-gray">★ {{ pelicula.rating_promedio }}</span>{% endif %}
+        </div>
+        <p class="detail-desc">{{ pelicula.descripcion }}</p>
+        <div class="detail-actions">
+          {% if user.is_authenticated %}
+            <a href="{% url 'comprar' pelicula.pk %}" class="btn btn-primary">🎟 Comprar entradas</a>
+            <a href="{% url 'toggle_favorito' pelicula.pk %}" class="btn btn-outline">
+              {% if pelicula in user.favoritos.all %}♥ En favoritos{% else %}♡ Favorito{% endif %}
+            </a>
+          {% else %}
+            <a href="{% url 'login' %}" class="btn btn-primary">Inicia sesión para comprar</a>
+          {% endif %}
+          {% if user.rol == 'admin' or user.is_superuser %}
+            <a href="{% url 'editar_pelicula' pelicula.pk %}" class="btn btn-ghost">✎ Editar</a>
+            <a href="{% url 'eliminar_pelicula' pelicula.pk %}" class="btn btn-danger">✕ Eliminar</a>
+          {% endif %}
+        </div>
+
+        <!-- Funciones disponibles -->
+        {% with funciones=pelicula.funciones.all %}
+        {% if funciones %}
+        <div class="card mb-2">
+          <div class="card-title">📅 Funciones disponibles</div>
+          {% for f in funciones %}
+          <div class="funcion-item">
+            <div class="funcion-info">
+              <div class="funcion-fecha">{{ f.fecha_hora|date:"D d/m/Y H:i" }}</div>
+              <div class="funcion-sala">Sala {{ f.sala }}</div>
+              <div class="funcion-seats">{{ f.asientos_disponibles }} asientos disponibles</div>
+            </div>
+            <div class="badge badge-purple">S/ {{ f.precio }}</div>
+          </div>
+          {% endfor %}
+        </div>
+        {% endif %}
+        {% endwith %}
+      </div>
+    </div>
+
+    <hr class="divider">
+
+    <!-- Comentarios -->
+    <div class="section-title">Comentarios ({{ comentarios.count }})</div>
+
+    {% if form and not ya_comento %}
+    <div class="card mb-2">
+      <div class="card-title">💬 Deja tu opinión</div>
+      <form method="post">
+        {% csrf_token %}
+        <div class="form-group">
+          <label class="form-label">Calificación</label>
+          <div class="radio-group">
+            {% for choice in form.rating %}
+              <span>{{ choice }}</span>
+            {% endfor %}
+          </div>
+          {% if form.rating.errors %}<div class="form-error">{{ form.rating.errors|join:", " }}</div>{% endif %}
+        </div>
+        <div class="form-group">
+          <label class="form-label">Comentario</label>
+          <textarea name="texto" class="form-control" rows="3" placeholder="Escribe tu comentario (1-500 caracteres)..." maxlength="500">{{ form.texto.value|default:'' }}</textarea>
+          {% if form.texto.errors %}<div class="form-error">{{ form.texto.errors|join:", " }}</div>{% endif %}
+        </div>
+        <button type="submit" class="btn btn-primary">Publicar comentario</button>
+      </form>
+    </div>
+    {% elif ya_comento %}
+    <div class="alert alert-info">Ya publicaste un comentario en esta película.</div>
+    {% elif not user.is_authenticated %}
+    <div class="alert alert-info"><a href="{% url 'login' %}" style="color:inherit;font-weight:600;">Inicia sesión</a> para comentar.</div>
+    {% endif %}
+
+    {% if comentarios %}
+      {% for c in comentarios %}
+      <div class="comment-card">
+        <div class="comment-header">
+          <div class="comment-avatar">{{ c.usuario.username|first|upper }}</div>
+          <span class="comment-user">{{ c.usuario.username }}</span>
+          {% if c.rating %}<span class="comment-stars">{% for i in "12345" %}{% if forloop.counter <= c.rating %}★{% else %}☆{% endif %}{% endfor %}</span>{% endif %}
+          <span class="comment-date">{{ c.fecha|date:"d/m/Y" }}</span>
+        </div>
+        <div class="comment-text">{{ c.texto }}</div>
+      </div>
+      {% endfor %}
+    {% else %}
+      <div class="empty-state" style="padding:2rem">
+        <div class="empty-icon">💭</div>
+        <p>Aún no hay comentarios. ¡Sé el primero!</p>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

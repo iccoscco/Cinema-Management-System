@@ -1,0 +1,82 @@
+{% extends 'base.html' %}
+{% block title %}Catálogo — CinemaManager{% endblock %}
+{% block content %}
+<div class="page">
+  <div class="container">
+
+    <!-- Hero compacto -->
+    <div class="hero">
+      <div class="hero-eyebrow">🎬 Cartelera</div>
+      <h1>El cine que te <span class="accent">mueve</span></h1>
+      <p class="hero-sub">Explora, comenta y reserva tus entradas.</p>
+    </div>
+
+    <!-- Géneros + búsqueda en misma fila -->
+    <div class="filter-row">
+      <div class="genre-chips">
+        <a href="{% url 'home' %}" class="chip {% if not genero_sel %}active{% endif %}">Todos</a>
+        {% for g in generos %}
+          <a href="?genero={{ g.id }}{% if query %}&q={{ query }}{% endif %}"
+             class="chip {% if genero_sel == g.id|stringformat:'s' %}active{% endif %}">{{ g.nombre }}</a>
+        {% endfor %}
+      </div>
+      <form method="get" class="search-mini">
+        <div class="search-input-wrap">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input type="text" name="q" value="{{ query }}" placeholder="Buscar..." class="search-input">
+        </div>
+        {% if query %}<a href="{% url 'home' %}" class="btn btn-ghost btn-sm">✕</a>{% endif %}
+      </form>
+    </div>
+
+    <!-- Destacadas -->
+    {% if destacadas and not query %}
+    <div class="section-title">Destacadas</div>
+    <div class="featured-strip">
+      {% for p in destacadas %}
+      <a href="{% url 'detalle' p.pk %}" class="featured-card">
+        {% if p.imagen %}<img src="{{ p.imagen.url }}" alt="{{ p.titulo }}">
+        {% elif p.poster_url %}<img src="{{ p.poster_url }}" alt="{{ p.titulo }}">
+        {% else %}<div class="featured-placeholder">🎥</div>{% endif %}
+        <div class="featured-overlay">
+          <span class="featured-badge">Destacada</span>
+          <div class="featured-title">{{ p.titulo }}</div>
+          <div class="featured-meta">{{ p.anio }} · {{ p.duracion }} min</div>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Catálogo -->
+    <div class="section-title">
+      {% if query %}Resultados para "{{ query }}"{% else %}Todas las películas{% endif %}
+    </div>
+
+    {% if peliculas %}
+    <div class="movie-grid">
+      {% for p in peliculas %}
+      <a href="{% url 'detalle' p.pk %}" class="movie-card">
+        {% if p.imagen %}<img src="{{ p.imagen.url }}" alt="{{ p.titulo }}" class="movie-poster">
+        {% elif p.poster_url %}<img src="{{ p.poster_url }}" alt="{{ p.titulo }}" class="movie-poster">
+        {% else %}<div class="movie-poster-placeholder">🎬</div>{% endif %}
+        <div class="movie-info">
+          <div class="movie-title">{{ p.titulo }}</div>
+          <div class="movie-meta">{{ p.anio }}{% if p.genero %} · {{ p.genero }}{% endif %}</div>
+          <div class="movie-meta">{{ p.duracion }} min</div>
+          {% if p.rating_promedio %}<div class="movie-rating">★ {{ p.rating_promedio }}</div>{% endif %}
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+      <div class="empty-icon">🔍</div>
+      <h3>Sin resultados</h3>
+      <p>No encontramos películas con ese criterio.</p>
+    </div>
+    {% endif %}
+
+  </div>
+</div>
+{% endblock %}

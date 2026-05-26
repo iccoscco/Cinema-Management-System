@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}Eliminar función{% endblock %}
+{% block content %}
+<div class="auth-wrapper">
+  <div class="auth-card">
+    <div class="auth-title">⚠ Eliminar función</div>
+    <p class="auth-sub">¿Seguro de eliminar la función de <strong>{{ funcion.pelicula.titulo }}</strong> del {{ funcion.fecha_hora|date:"d/m/Y H:i" }}?</p>
+    <form method="post">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-danger" style="width:100%;justify-content:center">Sí, eliminar</button>
+      <a href="{% url 'gestionar_funciones' %}" class="btn btn-ghost" style="width:100%;justify-content:center;margin-top:.5rem">Cancelar</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

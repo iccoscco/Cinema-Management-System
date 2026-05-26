@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}Eliminar película{% endblock %}
+{% block content %}
+<div class="auth-wrapper">
+  <div class="auth-card">
+    <div class="auth-title">⚠ Eliminar película</div>
+    <p class="auth-sub">¿Estás seguro de eliminar "<strong>{{ pelicula.titulo }}</strong>"? Esta acción no se puede deshacer.</p>
+    <form method="post">
+      {% csrf_token %}
+      <button type="submit" class="btn btn-danger" style="width:100%;justify-content:center">Sí, eliminar</button>
+      <a href="{% url 'detalle' pelicula.pk %}" class="btn btn-ghost" style="width:100%;justify-content:center;margin-top:.5rem">Cancelar</a>
+    </form>
+  </div>
+</div>
+{% endblock %}

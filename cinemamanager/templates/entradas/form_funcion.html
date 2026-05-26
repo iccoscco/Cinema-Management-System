@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block title %}{{ titulo }} — CinemaManager{% endblock %}
+{% block content %}
+<div class="auth-wrapper">
+  <div class="auth-card" style="max-width:500px">
+    <div class="auth-title">{{ titulo }}</div>
+    <form method="post">
+      {% csrf_token %}
+      {% for field in form %}
+      <div class="form-group">
+        <label class="form-label">{{ field.label }}</label>
+        {{ field }}
+        {% if field.errors %}<div class="form-error">{{ field.errors|join:", " }}</div>{% endif %}
+      </div>
+      {% endfor %}
+      <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:.5rem">Guardar</button>
+      <a href="{% url 'gestionar_funciones' %}" class="btn btn-ghost" style="width:100%;justify-content:center;margin-top:.5rem">Cancelar</a>
+    </form>
+  </div>
+</div>
+<style>
+  .auth-card input, .auth-card select { width:100%; background:var(--bg3); border:1px solid var(--border); border-radius:10px; padding:.65rem .9rem; color:var(--text); font-size:.9rem; font-family:'Inter',sans-serif; outline:none; }
+  .auth-card input:focus, .auth-card select:focus { border-color:var(--neon); box-shadow:0 0 0 3px rgba(176,38,255,.15); }
+</style>
+{% endblock %}
