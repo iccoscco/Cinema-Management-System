@@ -1,6 +1,6 @@
 from django import forms
 from .models import Pelicula, Comentario
-from validators import validar_duracion, validar_rating, validar_comentario
+from validators import validar_duracion, validar_rating, validar_comentario, validar_anio_pelicula
 
 
 class PeliculaForm(forms.ModelForm):
@@ -13,6 +13,16 @@ class PeliculaForm(forms.ModelForm):
             'duracion': forms.NumberInput(attrs={'placeholder': '60 - 300 minutos'}),
             'anio': forms.NumberInput(attrs={'placeholder': 'Año de estreno'}),
         }
+
+    def clean_anio(self):
+        anio = self.cleaned_data.get('anio')
+        if anio is None:
+            raise forms.ValidationError("El año es obligatorio.")
+        try:
+            validar_anio_pelicula(int(anio))
+        except (TypeError, ValueError) as e:
+            raise forms.ValidationError(str(e))
+        return anio
 
     def clean_duracion(self):
         duracion = self.cleaned_data.get('duracion')

@@ -137,22 +137,42 @@ def validar_comentario(texto: str) -> str:
 #  FUNCIONES / HORARIOS
 # ─────────────────────────────────────────────
 
-def validar_anio_funcion(anio: int) -> str:
+def validar_fecha_funcion(fecha) -> str:
     """
-    Valida que el año de una función no sea pasado.
+    Valida que la fecha/hora de una función sea estrictamente futura (mayor al momento actual).
 
-    Restricción: anio >= año actual
+    Restricción: fecha > datetime.now()
+
+    Raises:
+        TypeError: si fecha no es un objeto datetime.
+        ValueError: si la fecha es en el pasado o presente.
+    """
+    from datetime import datetime
+    if not isinstance(fecha, datetime):
+        raise TypeError("La fecha debe ser un objeto datetime.")
+    if fecha <= datetime.now():
+        raise ValueError(
+            f"La fecha de la función debe ser futura. Recibido: {fecha.strftime('%d/%m/%Y %H:%M')}"
+        )
+    return "Fecha válida"
+
+
+def validar_anio_pelicula(anio: int) -> str:
+    """
+    Valida que el año de estreno de una película no sea futuro.
+
+    Restricción: anio <= año actual
 
     Raises:
         TypeError: si anio no es un entero.
-        ValueError: si el año es anterior al año actual.
+        ValueError: si el año es mayor al año actual.
     """
     from datetime import datetime
     if not isinstance(anio, int):
         raise TypeError("El año debe ser un número entero.")
     anio_actual = datetime.now().year
-    if anio < anio_actual:
+    if anio > anio_actual:
         raise ValueError(
-            f"El año no puede ser anterior al año actual ({anio_actual}). Recibido: {anio}"
+            f"El año de estreno no puede ser futuro (máximo {anio_actual}). Recibido: {anio}"
         )
-    return "Año válido"
+    return "Año de película válido"

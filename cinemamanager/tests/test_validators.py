@@ -11,12 +11,12 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from validators import (
     validar_edad, validar_password, validar_duracion,
     validar_rating, validar_cantidad_entradas, validar_comentario,
-    validar_anio_funcion,
+    validar_fecha_funcion,
+    validar_anio_pelicula,
 )
 
-# ═══════════════════════════════════════════
+# =========================================
 #  EDAD  (13 <= edad <= 100)
-# ═══════════════════════════════════════════
 
 class TestEdadPE:
     @pytest.mark.parametrize("edad", [13, 20, 50, 100])
@@ -55,9 +55,8 @@ class TestEdadAVL:
             validar_edad(edad)
 
 
-# ═══════════════════════════════════════════
+# =========================================
 #  PASSWORD  (len >= 8)
-# ═══════════════════════════════════════════
 
 class TestPasswordPE:
     @pytest.mark.parametrize("password", ["abcd1234", "password!", "superclave99"])
@@ -87,9 +86,8 @@ class TestPasswordAVL:
         assert validar_password("abcd12345") == "Contraseña válida"
 
 
-# ═══════════════════════════════════════════
+# =========================================
 #  DURACIÓN  (60 <= minutos <= 300)
-# ═══════════════════════════════════════════
 
 class TestDuracionPE:
     @pytest.mark.parametrize("minutos", [60, 90, 120, 300])
@@ -128,9 +126,8 @@ class TestDuracionAVL:
             validar_duracion(minutos)
 
 
-# ═══════════════════════════════════════════
+# =========================================
 #  RATING  (1 <= rating <= 5)
-# ═══════════════════════════════════════════
 
 class TestRatingPE:
     @pytest.mark.parametrize("rating", [1, 2, 3, 4, 5])
@@ -169,9 +166,8 @@ class TestRatingAVL:
             validar_rating(rating)
 
 
-# ═══════════════════════════════════════════
+# =========================================
 #  ENTRADAS  (1 <= cantidad <= 10)
-# ═══════════════════════════════════════════
 
 class TestEntradasPE:
     @pytest.mark.parametrize("cantidad", [1, 5, 10])
@@ -210,9 +206,8 @@ class TestEntradasAVL:
             validar_cantidad_entradas(cantidad)
 
 
-# ═══════════════════════════════════════════
+# =========================================
 #  COMENTARIO  (1 <= len <= 500)
-# ═══════════════════════════════════════════
 
 class TestComentarioPE:
     @pytest.mark.parametrize("texto", ["Buena película", "Excelente, muy recomendada!"])
@@ -250,52 +245,105 @@ class TestComentarioAVL:
             validar_comentario(texto)
 
 
-# ═══════════════════════════════════════════
-#  AÑO FUNCIÓN  (anio >= año actual)
-# ═══════════════════════════════════════════
+# =========================================
+#  FECHA FUNCIÓN  (fecha > ahora exacto)
 
-from datetime import datetime as _dt
+from datetime import datetime as _dt, timedelta as _td
+
+
+class TestFechaFuncionPE:
+    """Partición de Equivalencia para fecha/hora de función."""
+
+    @pytest.mark.parametrize("delta", [
+        _td(hours=1), _td(days=1), _td(days=30), _td(days=365)
+    ])
+    def test_clase_valida_futura(self, delta):
+        """CE1 — Clase válida: fecha futura al momento actual."""
+        fecha = _dt.now() + delta
+        assert validar_fecha_funcion(fecha) == "Fecha válida"
+
+    @pytest.mark.parametrize("delta", [
+        _td(days=-1), _td(days=-30), _td(days=-365)
+    ])
+    def test_clase_invalida_pasada(self, delta):
+        """CE2 — Clase inválida: fecha pasada → lanza ValueError."""
+        fecha = _dt.now() + delta
+        with pytest.raises(ValueError):
+            validar_fecha_funcion(fecha)
+
+    @pytest.mark.parametrize("fecha", ["2027-01-01", 20270101, None])
+    def test_tipo_incorrecto(self, fecha):
+        """CE3 — Tipo incorrecto → lanza TypeError."""
+        with pytest.raises(TypeError):
+            validar_fecha_funcion(fecha)
+
+
+class TestFechaFuncionAVL:
+    """Análisis de Valores Límite para fecha de función."""
+
+    def test_un_segundo_futuro(self):
+        """Frontera mínima práctica: 1 segundo en el futuro → válido."""
+        assert validar_fecha_funcion(_dt.now() + _td(seconds=2)) == "Fecha válida"
+
+    def test_un_dia_futuro(self):
+        """1 día en el futuro → válido."""
+        assert validar_fecha_funcion(_dt.now() + _td(days=1)) == "Fecha válida"
+
+    def test_un_segundo_pasado(self):
+        """1 segundo en el pasado → inválido."""
+        with pytest.raises(ValueError):
+            validar_fecha_funcion(_dt.now() - _td(seconds=1))
+
+    def test_un_dia_pasado(self):
+        """1 día en el pasado → inválido."""
+        with pytest.raises(ValueError):
+            validar_fecha_funcion(_dt.now() - _td(days=1))
+
+
+# =========================================
+#  AÑO PELÍCULA  (anio <= año actual)
+
 _ANIO_ACTUAL = _dt.now().year
 
 
-class TestAnioFuncionPE:
-    """Partición de Equivalencia para año de función."""
+class TestAnioPeliculaPE:
+    """Partición de Equivalencia para año de estreno de película."""
 
-    @pytest.mark.parametrize("anio", [_ANIO_ACTUAL, _ANIO_ACTUAL + 1, _ANIO_ACTUAL + 5])
+    @pytest.mark.parametrize("anio", [_ANIO_ACTUAL, _ANIO_ACTUAL - 1, 2000, 1950])
     def test_clase_valida(self, anio):
-        """CE1 — Clase válida: anio >= año actual."""
-        assert validar_anio_funcion(anio) == "Año válido"
+        """CE1 — Clase válida: anio <= año actual."""
+        assert validar_anio_pelicula(anio) == "Año de película válido"
 
-    @pytest.mark.parametrize("anio", [_ANIO_ACTUAL - 1, _ANIO_ACTUAL - 5, 2000, 1990])
-    def test_clase_invalida_pasado(self, anio):
-        """CE2 — Clase inválida: año pasado → lanza ValueError."""
+    @pytest.mark.parametrize("anio", [_ANIO_ACTUAL + 1, _ANIO_ACTUAL + 5, 2099])
+    def test_clase_invalida_futuro(self, anio):
+        """CE2 — Clase inválida: año futuro → lanza ValueError."""
         with pytest.raises(ValueError):
-            validar_anio_funcion(anio)
+            validar_anio_pelicula(anio)
 
-    @pytest.mark.parametrize("anio", ["2026", 2026.0, None])
+    @pytest.mark.parametrize("anio", ["2024", 2024.0, None])
     def test_tipo_incorrecto(self, anio):
         """CE3 — Tipo incorrecto → lanza TypeError."""
         with pytest.raises(TypeError):
-            validar_anio_funcion(anio)
+            validar_anio_pelicula(anio)
 
 
-class TestAnioFuncionAVL:
-    """Análisis de Valores Límite para año de función (frontera = año actual)."""
+class TestAnioPeliculaAVL:
+    """Análisis de Valores Límite para año de película (frontera = año actual)."""
 
     def test_anio_actual_exacto(self):
-        """Frontera inferior exacta → válido."""
-        assert validar_anio_funcion(_ANIO_ACTUAL) == "Año válido"
+        """Frontera superior exacta → válido."""
+        assert validar_anio_pelicula(_ANIO_ACTUAL) == "Año de película válido"
 
-    def test_anio_actual_mas_uno(self):
-        """Frontera + 1 → válido."""
-        assert validar_anio_funcion(_ANIO_ACTUAL + 1) == "Año válido"
+    def test_anio_anterior(self):
+        """Frontera - 1 → válido."""
+        assert validar_anio_pelicula(_ANIO_ACTUAL - 1) == "Año de película válido"
 
-    def test_anio_anterior_exacto(self):
-        """Frontera - 1 (año pasado) → inválido."""
+    def test_anio_siguiente(self):
+        """Frontera + 1 (futuro) → inválido."""
         with pytest.raises(ValueError):
-            validar_anio_funcion(_ANIO_ACTUAL - 1)
+            validar_anio_pelicula(_ANIO_ACTUAL + 1)
 
-    def test_anio_muy_anterior(self):
-        """Año muy en el pasado → inválido."""
+    def test_anio_muy_futuro(self):
+        """Año muy en el futuro → inválido."""
         with pytest.raises(ValueError):
-            validar_anio_funcion(2000)
+            validar_anio_pelicula(2099)

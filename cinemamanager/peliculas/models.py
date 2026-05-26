@@ -16,13 +16,17 @@ class Pelicula(models.Model):
     duracion = models.PositiveIntegerField(help_text='Duración en minutos (60-300)')
     genero = models.ForeignKey(Genero, on_delete=models.SET_NULL, null=True)
     imagen = models.ImageField(upload_to='peliculas/', blank=True, null=True)
+    poster_url = models.URLField(blank=True, null=True, help_text='URL externa del póster (TMDB)')
     anio = models.PositiveIntegerField()
     destacada = models.BooleanField(default=False)
     creada = models.DateTimeField(auto_now_add=True)
 
     def clean(self):
+        from datetime import datetime
         if self.duracion is not None and (self.duracion < 60 or self.duracion > 300):
             raise ValidationError({'duracion': 'La duración debe estar entre 60 y 300 minutos.'})
+        if self.anio is not None and self.anio > datetime.now().year:
+            raise ValidationError({'anio': f"El año de estreno no puede ser futuro (máximo {datetime.now().year})."})
 
     @property
     def rating_promedio(self):

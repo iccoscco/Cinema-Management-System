@@ -13,8 +13,8 @@ class Funcion(models.Model):
 
     def clean(self):
         from django.core.exceptions import ValidationError
-        if self.fecha_hora and self.fecha_hora.year < datetime.now().year:
-            raise ValidationError({'fecha_hora': f"No se pueden crear funciones en años pasados. Año mínimo: {datetime.now().year}"})
+        if self.fecha_hora and self.fecha_hora <= datetime.now():
+            raise ValidationError({'fecha_hora': f"La fecha de la función debe ser futura al momento actual."})
 
     @property
     def asientos_disponibles(self):

@@ -1,6 +1,6 @@
 from django import forms
 from .models import Compra, Funcion
-from validators import validar_cantidad_entradas, validar_anio_funcion
+from validators import validar_cantidad_entradas, validar_fecha_funcion
 
 
 class CompraForm(forms.Form):
@@ -50,7 +50,7 @@ class FuncionForm(forms.ModelForm):
         if fecha_hora is None:
             raise forms.ValidationError("La fecha y hora son obligatorias.")
         try:
-            validar_anio_funcion(int(fecha_hora.year))
+            validar_fecha_funcion(fecha_hora)
         except (TypeError, ValueError) as e:
             raise forms.ValidationError(str(e))
         return fecha_hora
